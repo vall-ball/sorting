@@ -1,0 +1,920 @@
+type: edu
+custom_name: stage5
+files:
+- name: src/sorting/Main.java
+  visible: true
+  text: |
+    package sorting;
+
+    import java.util.*;
+
+    public class Main {
+        public static void main(final String[] args) {
+            Scanner scanner = new Scanner(System.in);
+
+            while (scanner.hasNextLong()) {
+                long number = scanner.nextLong();
+                // write your code here
+            }
+        }
+    }
+  learner_created: false
+- name: test/SortingTest.java
+  visible: false
+  text: |
+    import common.SortingToolStage5Test;
+
+    public class SortingTest extends SortingToolStage5Test {
+
+    }
+  learner_created: false
+- name: test/common/SortingToolStage5Test.kt
+  visible: false
+  text: |+
+    package common
+
+    import org.hyperskill.hstest.stage.StageTest
+    import org.hyperskill.hstest.testcase.CheckResult
+    import org.hyperskill.hstest.testcase.TestCase
+    import sorting.Main
+    import java.util.*
+
+    abstract class SortingToolStage5Test : StageTest<SortingToolClue>(Main::class.java) {
+
+        override fun generate(): List<TestCase<SortingToolClue>> {
+            return stage4Tests() + stage5Tests()
+        }
+
+        override fun check(reply: String, clue: SortingToolClue): CheckResult {
+            return when {
+                badArgs(clue.args) -> CheckResult(true)  // TODO: test something here
+                "byCount" in clue.args -> checkByCount(reply, clue)
+                else -> checkNatural(reply, clue)
+            }
+        }
+
+        private fun checkByCount(reply: String, clue: SortingToolClue): CheckResult {
+            return when {
+                "long" in clue.args -> checkByCount(parseLongTokens(clue.consoleInput), { it.toInt() }, clue, reply)
+                "word" in clue.args -> checkByCount(parseWordTokens(clue.consoleInput), { it }, clue, reply)
+                "line" in clue.args -> checkByCount(parseLineTokens(clue.consoleInput), { it }, clue, reply)
+
+                else -> throw IllegalArgumentException("Bad test: no data type found")
+            }
+        }
+
+        private fun checkNatural(reply: String, clue: SortingToolClue): CheckResult {
+            return when {
+                "long" in clue.args -> checkNatural(parseLongTokens(clue.consoleInput), ::parseLongTokens, clue, reply)
+                "word" in clue.args -> checkNatural(parseWordTokens(clue.consoleInput), ::parseWordTokens, clue, reply)
+                "line" in clue.args -> checkNatural(parseLineTokens(clue.consoleInput), ::parseLineTokens, clue, reply)
+
+                else -> throw IllegalArgumentException("Bad test: no data type found")
+            }
+        }
+
+        private fun badArgs(args: List<String>): Boolean {
+            val unknownArgs =
+                    args.toSet() - setOf("-dataType", "-sortingType", "long", "word", "line", "natural", "byCount")
+
+            if (unknownArgs.isNotEmpty()) {
+                return true
+            }
+
+            if (args.last() == "-dataType" || args.last() == "-sortingType") {
+                return true
+            }
+
+            return false
+        }
+    }
+
+    fun stage5Tests(): List<TestCase<SortingToolClue>> {
+        return listOf(
+                createTest(
+                        """
+                    |1 -2   333 4
+                    |42
+                    |1                 1
+                    """.trimMargin(),
+                        true,
+                        "-sortingType"
+                ),
+                createTest(
+                        """
+                    |1 -2   333 4
+                    |42
+                    |1                 1
+                    """.trimMargin(),
+                        true,
+                        "-sortingType", "byCount", "-dataType", "long", "-abc"
+                ),
+                createTest(
+                        """
+                    |1111 1111
+                    |22222
+                    |3
+                    |44
+                    """.trimMargin(),
+                        false,
+                        "-sortingType", "byCount", "-dataType", "line", "-cde"
+                ),
+                createTest(
+                        """
+                    |1111 1111
+                    |22222
+                    |3
+                    |44
+                    """.trimMargin(),
+                        false,
+                        "-dataType", "line", "-sortingType"
+                )
+        )
+    }
+
+
+    fun stage4Tests(): List<TestCase<SortingToolClue>> {
+        return listOf(
+                createTest(
+                        """
+                    |1 -2   333 4
+                    |42
+                    |1                 1
+                    """.trimMargin(),
+                        true,
+                        "-dataType", "long", "-sortingType", "natural"
+                ),
+                createTest(
+                        """
+                    |1 -2   333 4
+                    |42
+                    |1                 1
+                    """.trimMargin(),
+                        true,
+                        "-dataType", "long"
+                ),
+                createTest(
+                        """
+                    |1 -2   333 4
+                    |42
+                    |1                 1
+                    """.trimMargin(),
+                        true,
+                        "-sortingType", "byCount", "-dataType", "long"
+                ),
+                createTest(
+                        """
+                    |1 -2   333 4
+                    |42
+                    |1                 1
+                    """.trimMargin(),
+                        true,
+                        "-sortingType", "byCount", "-dataType", "word"
+                ),
+                createTest(
+                        """
+                    |1 -2   333 4
+                    |42
+                    |42
+                    |1                 1
+                    """.trimMargin(),
+                        true,
+                        "-sortingType", "byCount", "-dataType", "line"
+                ),
+                createTest(
+                        """
+                    |1111 1111
+                    |22222
+                    |3
+                    |44
+                    """.trimMargin(),
+                        false,
+                        "-sortingType", "byCount", "-dataType", "line"
+                ),
+                createTest(
+                        """
+                    |1111 1111
+                    |22222
+                    |3
+                    |44
+                    """.trimMargin(),
+                        false,
+                        "-sortingType", "byCount", "-dataType", "word"
+                ),
+                createTest(
+                        """
+                    |1111 1111
+                    |22222
+                    |3
+                    |44
+                    """.trimMargin(),
+                        false,
+                        "-sortingType", "byCount", "-dataType", "long"
+                )
+        )
+    }
+
+
+    fun revealRawTest(clue: SortingToolClue, reply: String): String {
+        return with(clue) { "Args:\n${args.joinToString(" ")}\nInput:\n$consoleInput\nYour output:\n$reply\n\n" }
+    }
+
+    class SortingToolClue(val consoleInput: String, val revealTest: Boolean, val args: List<String>)
+
+    fun createTest(
+            consoleInput: String,
+            revealTest: Boolean,
+            vararg args: String = arrayOf("-dataType", "long")
+    ): TestCase<SortingToolClue> {
+        return TestCase<SortingToolClue>()
+                .setAttach(SortingToolClue(consoleInput, revealTest, args.toList()))
+                .setInput(consoleInput)
+                .addArguments(*args)
+    }
+
+    fun parseLongTokens(input: String): List<Int> {
+        val scanner = Scanner(input)
+
+        val longTokens = mutableListOf<Int>()
+
+        while (scanner.hasNextInt()) {
+            longTokens.add(scanner.nextInt())
+        }
+
+        return longTokens
+    }
+
+    fun parseWordTokens(input: String): List<String> {
+        val scanner = Scanner(input)
+
+        val wordTokens = mutableListOf<String>()
+
+        while (scanner.hasNext()) {
+            wordTokens.add(scanner.next())
+        }
+
+        return wordTokens
+    }
+
+    fun parseLineTokens(input: String): List<String> {
+        return input.lines()
+    }
+
+    fun <TokenType : Comparable<TokenType>> checkNatural(
+            actualTokens: List<TokenType>,
+            sortedTokensParser: (String) -> List<TokenType>,
+            clue: SortingToolClue,
+            reply_: String
+    ): CheckResult {
+        val reply = reply_.trim()
+        val lines = reply.lines()
+
+        if (lines.size != 2) {
+            return if (clue.revealTest) {
+                CheckResult(
+                        false,
+                        "Can't parse your output: expected 2 lines.\n" +
+                                revealRawTest(clue, reply)
+                )
+            } else {
+                CheckResult(false, "Can't parse your output: expected 2 lines.")
+            }
+        }
+
+        val totalRegex = """(\d+)""".toRegex()
+        val totalMatchResult = totalRegex.find(lines[0])
+        if (totalMatchResult == null) {
+            return if (clue.revealTest) {
+                CheckResult(
+                        false,
+                        "Can't find number in the first line of your output.\n" +
+                                revealRawTest(clue, reply)
+                )
+            } else {
+                CheckResult(false, "Can't find number in the first line of your output.")
+            }
+        }
+
+        val totalTokens = totalMatchResult.groupValues[1].toInt()
+
+        val actualTotal = actualTokens.size
+
+        if (actualTotal != totalTokens) {
+            return if (clue.revealTest) {
+                CheckResult(
+                        false,
+                        "Total tokens ($totalTokens) are incorrect. Expected: $actualTotal.\n" +
+                                revealRawTest(clue, reply)
+                )
+            } else {
+                CheckResult(false, "Total tokens are incorrect.")
+            }
+        }
+
+        val sortedActualTokens = actualTokens.sorted()
+
+        val sortedTokens = sortedTokensParser(lines[1].substringAfter(":").dropWhile { it in setOf('\n', '\r') })
+
+        val total = sortedTokens.size
+
+        if (actualTotal != total) {
+            return if (clue.revealTest) {
+                CheckResult(
+                        false,
+                        "Total sorted tokens ($total) are incorrect. Expected: $actualTotal.\n" +
+                                revealRawTest(clue, reply)
+                )
+            } else {
+                CheckResult(false, "Total sorted tokens are incorrect.")
+            }
+        }
+
+        if (sortedActualTokens != sortedTokens) {
+            return if (clue.revealTest) {
+                CheckResult(
+                        false,
+                        "Sorted tokens are incorrect.\n" +
+                                revealRawTest(clue, reply)
+                )
+            } else {
+                CheckResult(false, "Sorted tokens are incorrect.")
+            }
+        }
+
+        return CheckResult(true)
+    }
+
+    fun <TokenType : Comparable<TokenType>> checkByCount(
+            actualTokens: List<TokenType>,
+            tokenParser: (String) -> TokenType,
+            clue: SortingToolClue,
+            reply_: String
+    ): CheckResult {
+        val reply = reply_.trim()
+        val lines = reply.lines()
+
+        val totalRegex = """(\d+)""".toRegex()
+        val totalMatchResult = totalRegex.find(lines[0])
+        if (totalMatchResult == null) {
+            return if (clue.revealTest) {
+                CheckResult(
+                        false,
+                        "Can't find number in the first line of your output.\n" +
+                                revealRawTest(clue, reply)
+                )
+            } else {
+                CheckResult(false, "Can't find number in the first line of your output.")
+            }
+        }
+
+        val totalTokens = totalMatchResult.groupValues[1].toInt()
+
+        val actualTotal = actualTokens.size
+
+        if (actualTotal != totalTokens) {
+            return if (clue.revealTest) {
+                CheckResult(
+                        false,
+                        "Total tokens ($totalTokens) are incorrect. Expected: $actualTotal.\n" +
+                                revealRawTest(clue, reply)
+                )
+            } else {
+                CheckResult(false, "Total tokens are incorrect.")
+            }
+        }
+
+        val tokenToCount = mutableMapOf<TokenType, Int>()
+
+        for (token in actualTokens) {
+            tokenToCount[token] = (tokenToCount[token] ?: 0) + 1
+        }
+
+        val actualSortedByCount = tokenToCount.toList().sortedWith(compareBy({ it.second }, { it.first }))
+        val linesWithTokens = lines.drop(1)
+
+        if (actualSortedByCount.size != linesWithTokens.size) {
+            return if (clue.revealTest) {
+                CheckResult(
+                        false,
+                        "Lines with tokens (${linesWithTokens.size}) are incorrect. Expected: ${actualSortedByCount.size}.\n" +
+                                revealRawTest(clue, reply)
+                )
+            } else {
+                CheckResult(false, "Lines with tokens are incorrect.")
+            }
+        }
+
+        for ((lineId, line) in linesWithTokens.withIndex()) {
+            val token = tokenParser(line.substringBefore(':'))
+            val info = line.substringAfter(':')
+
+            val (actualToken, actualTimes) = actualSortedByCount[lineId]
+
+            if (token != actualToken) {
+                return if (clue.revealTest) {
+                    CheckResult(
+                            false,
+                            "Token ($token) is incorrect. Expected: $actualToken.\n" +
+                                    revealRawTest(clue, reply)
+                    )
+                } else {
+                    CheckResult(false, "Token is incorrect.")
+                }
+            }
+
+            // TODO: check info (times and percentage)
+        }
+
+        return CheckResult(true)
+    }
+
+  learner_created: false
+- name: src/sorting/InputHandler.java
+  visible: true
+  text: |
+    package sorting;
+
+    import java.util.ArrayList;
+    import java.util.List;
+    import java.util.Scanner;
+
+    public class InputHandler {
+        Scanner scanner = new Scanner(System.in);
+
+        public void sort() {
+
+            List<Integer> list = new ArrayList<>();
+
+            while (scanner.hasNextLong()) {
+                int number = scanner.nextInt();
+                list.add(number);
+            }
+
+            int[] array = new int[list.size()];
+            for (int i = 0; i < list.size(); i++) {
+                array[i] = list.get(i);
+            }
+            SortingTool.mergeSort(array, 0, array.length);
+            System.out.println("Total numbers: " + array.length + ".");
+            System.out.print("Sorted data: ");
+            for (int i : array) {
+                System.out.print(i + " ");
+            }
+        }
+
+
+
+    }
+  learner_created: true
+- name: src/sorting/SortingTool.java
+  visible: true
+  text: |
+    package sorting;
+
+    public class SortingTool {
+
+        public static void mergeSort(int[] array, int leftIncl, int rightExcl) {
+            // the base case: if subarray contains <= 1 items, stop dividing because it's sorted
+            if (rightExcl <= leftIncl + 1) {
+                return;
+            }
+
+            /* divide: calculate the index of the middle element */
+            int middle = leftIncl + (rightExcl - leftIncl) / 2;
+
+            mergeSort(array, leftIncl, middle);  // conquer: sort the left subarray
+            mergeSort(array, middle, rightExcl); // conquer: sort the right subarray
+
+            /* combine: merge both sorted subarrays into sorted one */
+            merge(array, leftIncl, middle, rightExcl);
+        }
+        private static void merge(int[] array, int left, int middle, int right) {
+            int i = left;   // index for the left subarray
+            int j = middle; // index for the right subarray
+            int k = 0;      // index for the temp subarray
+
+            int[] temp = new int[right - left]; // temporary array for merging
+
+        /* get the next lesser element from one of two subarrays
+           and then insert it in the array until one of the subarrays is empty */
+            while (i < middle && j < right) {
+                if (array[i] <= array[j]) {
+                    temp[k] = array[i];
+                    i++;
+                } else {
+                    temp[k] = array[j];
+                    j++;
+                }
+                k++;
+            }
+
+            /* insert all the remaining elements of the left subarray in the array */
+            for (;i < middle; i++, k++) {
+                temp[k] = array[i];
+            }
+
+            /* insert all the remaining elements of the right subarray in the array */
+            for (;j < right; j++, k++) {
+                temp[k] = array[j];
+            }
+
+            /* effective copying elements from temp to array */
+            System.arraycopy(temp, 0, array, left, temp.length);
+        }
+    }
+  learner_created: true
+- name: src/sorting/ArgsParser.java
+  visible: true
+  text: |
+    package sorting;
+
+    public class ArgsParser {
+
+
+    }
+  learner_created: true
+- name: src/sorting/LineHandler.java
+  visible: true
+  text: |-
+    package sorting;
+
+    import java.util.*;
+
+    public class LineHandler {
+        String sortingType;
+
+        public LineHandler(String sortingType) {
+            this.sortingType = sortingType;
+        }
+
+        public List<String> getList() {
+            Scanner scanner = new Scanner(System.in);
+            String max;
+            long countOfMax = 0;
+            List<String> list = new ArrayList<>();
+
+            while (scanner.hasNext()) {
+                String line = scanner.nextLine();
+                list.add(line);
+            }
+            return list;
+        }
+
+        public void handle() {
+            switch (sortingType) {
+                case "natural":
+                    sortNaturally();
+                    break;
+                case "byCount":
+                    sortByCount();
+                    break;
+            }
+
+        }
+
+        public void sortNaturally() {
+            List<String> list = getList();
+            Collections.sort(list, new Comparator<String>() {
+                @Override
+                public int compare(String one, String two) {
+                    return one.compareTo(two);
+                }
+            });
+
+            System.out.println("Total lines: " + list.size());
+            System.out.println("Sorted data: ");
+            for (String s : list) {
+                System.out.println(s);
+            }
+        }
+
+        public void sortByCount() {
+            List<String> list = getList();
+            Map<String, Integer> map = new HashMap<>();
+            for (String s : list) {
+                if (map.containsKey(s)) {
+                    int i = map.get(s);
+                    i++;
+                    map.put(s, i);
+                } else {
+                    map.put(s, 1);
+                }
+            }
+
+            List<Integer> counts = new ArrayList<>();
+            for (String s : map.keySet()) {
+                counts.add(map.get(s));
+            }
+
+            Set<Integer> set = new HashSet<>();
+            set.addAll(counts);
+            counts.clear();
+            counts.addAll(set);
+            Collections.sort(counts);
+
+            Map<Integer, Set<String>> dataEntryToCount = new HashMap<>();
+            for (String s : map.keySet()) {
+                if (dataEntryToCount.containsKey(map.get(s))) {
+                    dataEntryToCount.get(map.get(s)).add(s);
+                } else {
+                    Set<String> set1 = new TreeSet<>();
+                    set1.add(s);
+                    dataEntryToCount.put(map.get(s), set1);
+                }
+            }
+            System.out.println("Total words: " + list.size());
+
+            for (int i : counts) {
+                for (String s : dataEntryToCount.get(i)) {
+                    System.out.println(s + ": " + i + " time(s), " + (int)((double) i / (double) list.size() * 100) + "%");
+                }
+            }
+
+        }
+    }
+
+    /*
+     public void handle() {
+            Scanner scanner = new Scanner(System.in);
+            String max;
+            long countOfMax = 0;
+            List<String> list = new ArrayList<>();
+
+            while (scanner.hasNext()) {
+                String line = scanner.nextLine();
+                list.add(line);
+            }
+
+            System.out.println("Total lines: " + list.size() + ".");
+            max = list.get(0);
+            for (String s : list) {
+                max = compare(max, s);
+            }
+            for (String s : list) {
+                if (max.equals(s)) {
+                    countOfMax++;
+                }
+            }
+            int percentage = (int)((double) countOfMax / (double) list.size() * 100);
+            System.out.println("The longest line:");
+            System.out.println(max);
+            System.out.println("(" + countOfMax + " time(s)), " + percentage + "%).");
+        }
+
+        private String compare(String one, String two) {
+            if (one.length() == two.length()) {
+                if (one.compareTo(two) > 0) {
+                    return one;
+                } else return two;
+            } else if (one.length() > two.length()) {
+                return one;
+            } else {
+                return two;
+            }
+        }
+     */
+  learner_created: true
+- name: src/sorting/NumberHandler.java
+  visible: true
+  text: |-
+    package sorting;
+
+    import java.util.*;
+
+    public class NumberHandler {
+        String sortingType;
+
+        public NumberHandler(String sortingType) {
+            this.sortingType = sortingType;
+        }
+
+        public List<Long> getList() {
+            Scanner scanner = new Scanner(System.in);
+            List<Long> list = new ArrayList<>();
+
+            while (scanner.hasNextLong()) {
+                long number = scanner.nextLong();
+                list.add(number);
+            }
+            return list;
+        }
+        public void handle() {
+            switch (sortingType) {
+                case "natural":
+                    sortNaturally();
+                    break;
+                case "byCount":
+                    sortByCount();
+                    break;
+            }
+
+        }
+
+        public void sortNaturally() {
+            List<Long> list = getList();
+            Collections.sort(list);
+
+            System.out.println("Total numbers: " + list.size());
+            System.out.print("Sorted data: ");
+            for (long l : list) {
+                System.out.print(l + " ");
+            }
+        }
+
+        public void sortByCount() {
+            List<Long> list = getList();
+            Map<Long, Integer> map = new HashMap<>();
+            for (Long s : list) {
+                if (map.containsKey(s)) {
+                    int i = map.get(s);
+                    i++;
+                    map.put(s, i);
+                } else {
+                    map.put(s, 1);
+                }
+            }
+
+            List<Integer> counts = new ArrayList<>();
+            for (Long s : map.keySet()) {
+                counts.add(map.get(s));
+            }
+
+            Set<Integer> set = new TreeSet<>();
+            set.addAll(counts);
+            counts.clear();
+            counts.addAll(set);
+            Collections.sort(counts);
+
+            Map<Integer, Set<Long>> dataEntryToCount = new HashMap<>();
+            for (Long s : map.keySet()) {
+                if (dataEntryToCount.containsKey(map.get(s))) {
+                    dataEntryToCount.get(map.get(s)).add(s);
+                } else {
+                    Set<Long> set1 = new TreeSet<>();
+                    set1.add(s);
+                    dataEntryToCount.put(map.get(s), set1);
+                }
+            }
+            System.out.println("Total numbers: " + list.size());
+
+            for (int i : counts) {
+                for (Long s : dataEntryToCount.get(i)) {
+                    System.out.println(s + ": " + i + " time(s), " + (int)((double) i / (double) list.size() * 100) + "%");
+                }
+            }
+
+        }
+
+
+    }
+
+    /*
+     public void handle() {
+            Scanner scanner = new Scanner(System.in);
+            long max;
+            long countOfMax = 0;
+            List<Long> list = new ArrayList<>();
+
+            while (scanner.hasNextLong()) {
+                long number = scanner.nextLong();
+                list.add(number);
+            }
+
+            System.out.println("Total numbers: " + list.size());
+            max = Collections.max(list);
+            for (long l : list) {
+                if (l == max) {
+                    countOfMax++;
+                }
+            }
+            int percentage = (int)((double) countOfMax / (double) list.size() * 100);
+            System.out.println("The largest number: " + max + "(" + countOfMax + " time(s)), " + percentage + "%).");
+        }
+     */
+  learner_created: true
+- name: src/sorting/WordHandler.java
+  visible: true
+  text: |-
+    package sorting;
+
+    import java.util.*;
+
+    public class WordHandler {
+        String sortingType;
+
+        public WordHandler(String sortingType) {
+            this.sortingType = sortingType;
+        }
+
+        public List<String> getList() {
+            Scanner scanner = new Scanner(System.in);
+            String max;
+            long countOfMax = 0;
+            List<String> list = new ArrayList<>();
+
+            while (scanner.hasNext()) {
+                String word = scanner.next();
+                list.add(word);
+            }
+            return list;
+        }
+
+        public void handle() {
+            switch (sortingType) {
+                case "natural":
+                    sortNaturally();
+                    break;
+                case "byCount":
+                    sortByCount();
+                    break;
+            }
+
+        }
+
+        public void sortNaturally() {
+            List<String> list = getList();
+            Collections.sort(list, new Comparator<String>() {
+                @Override
+                public int compare(String one, String two) {
+                    return one.compareTo(two);
+                }
+            });
+
+            System.out.println("Total words: " + list.size());
+            System.out.print("Sorted data: ");
+            for (String s : list) {
+                System.out.print(s + " ");
+            }
+        }
+
+        public void sortByCount() {
+            List<String> list = getList();
+            Map<String, Integer> map = new HashMap<>();
+            for (String s : list) {
+                if (map.containsKey(s)) {
+                    int i = map.get(s);
+                    i++;
+                    map.put(s, i);
+                } else {
+                    map.put(s, 1);
+                }
+            }
+
+            List<Integer> counts = new ArrayList<>();
+            for (String s : map.keySet()) {
+                counts.add(map.get(s));
+            }
+
+            Set<Integer> set = new HashSet<>();
+            set.addAll(counts);
+            counts.clear();
+            counts.addAll(set);
+            Collections.sort(counts);
+
+            Map<Integer, Set<String>> dataEntryToCount = new HashMap<>();
+            for (String s : map.keySet()) {
+                if (dataEntryToCount.containsKey(map.get(s))) {
+                    dataEntryToCount.get(map.get(s)).add(s);
+                } else {
+                    Set<String> set1 = new TreeSet<>();
+                    set1.add(s);
+                    dataEntryToCount.put(map.get(s), set1);
+                }
+            }
+            System.out.println("Total words: " + list.size());
+
+            for (int i : counts) {
+                for (String s : dataEntryToCount.get(i)) {
+                    System.out.println(s + ": " + i + " time(s), " + (int)((double) i / (double) list.size() * 100) + "%");
+            }
+        }
+
+        }
+    }
+    ////////////////////////////////
+    /*
+
+            System.out.println("Total words: " + list.size());
+            max = list.get(0);
+            for (String s : list) {
+                max = compare(max, s);
+            }
+            for (String s : list) {
+                if (max.equals(s)) {
+                    countOfMax++;
+                }
+            }
+            int percentage = (int)((double) countOfMax / (double) list.size() * 100);
+            System.out.println("The longest word: " + max + " (" + countOfMax + " time(s)), " + percentage + "%).");
+        }
+
+
+     */
+  learner_created: true
+feedback_link: https://hyperskill.org/projects/45/stages/243/implement
+status: Solved
+feedback:
+  message: Congratulations! Continue on <a href="https://hyperskill.org/projects/45/stages/243/implement">JetBrains
+    Academy</a>
+  time: Tue, 13 Oct 2020 04:13:27 UTC
+record: 5

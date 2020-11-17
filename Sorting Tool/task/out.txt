@@ -1,0 +1,2 @@
+Total numbers: 3
+Sorted data: -2 0 1 
